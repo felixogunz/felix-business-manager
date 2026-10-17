@@ -1,11 +1,12 @@
+
 from contextlib import asynccontextmanager
 from datetime import date, datetime
 from decimal import Decimal
 from pathlib import Path
 
-from fastapi import Depends, FastAPI, HTTPException, Query
-from fastapi.responses import FileResponse
+from fastapi import Depends, FastAPI, HTTPException, Query, Request
 from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel, ConfigDict, Field
 from sqlalchemy import func, or_, select, text
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
@@ -15,16 +16,28 @@ from app.database import Base, engine, get_db
 from app.models import Client, Interaction, Project
 
 
-FRONTEND_DIR = Path(__file__).resolve().parent.parent / "frontend"
+# ---------- Frontend configuration ----------
+
+APP_DIR = Path(__file__).resolve().parent
+
+TEMPLATES_DIR = APP_DIR / "templates"
+STATIC_DIR = APP_DIR / "static"
+
+templates = Jinja2Templates(directory=str(TEMPLATES_DIR))
 
 
 # ---------- Application startup ----------
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    if not (FRONTEND_DIR / "index.html").is_file():
+    if not (TEMPLATES_DIR / "index.html").is_file():
         raise RuntimeError(
-            f"Frontend index.html was not found in {FRONTEND_DIR}"
+            f"Frontend index.html was not found in {TEMPLATES_DIR}"
+        )
+
+    if not STATIC_DIR.is_dir():
+        raise RuntimeError(
+            f"Static directory was not found in {STATIC_DIR}"
         )
 
     Base.metadata.create_all(bind=engine)
@@ -42,9 +55,10 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+# Serve CSS, JavaScript, images and other static assets.
 app.mount(
     "/static",
-    StaticFiles(directory=str(FRONTEND_DIR)),
+    StaticFiles(directory=str(STATIC_DIR)),
     name="static",
 )
 
@@ -150,7 +164,10 @@ def commit_or_conflict(db: Session, message: str) -> None:
         db.commit()
     except IntegrityError as exc:
         db.rollback()
-        raise HTTPException(status_code=409, detail=message) from exc
+        raise HTTPException(
+            status_code=409,
+            detail=message,
+        ) from exc
     except SQLAlchemyError as exc:
         db.rollback()
         raise HTTPException(
@@ -163,7 +180,10 @@ def get_client_or_404(db: Session, client_id: int) -> Client:
     client = db.get(Client, client_id)
 
     if client is None:
-        raise HTTPException(status_code=404, detail="Client not found")
+        raise HTTPException(
+            status_code=404,
+            detail="Client not found",
+        )
 
     return client
 
@@ -172,7 +192,10 @@ def get_project_or_404(db: Session, project_id: int) -> Project:
     project = db.get(Project, project_id)
 
     if project is None:
-        raise HTTPException(status_code=404, detail="Project not found")
+        raise HTTPException(
+            status_code=404,
+            detail="Project not found",
+        )
 
     return project
 
@@ -197,8 +220,12 @@ def validate_interaction_links(
 # ---------- Website and health ----------
 
 @app.get("/", include_in_schema=False)
-def homepage():
-    return FileResponse(FRONTEND_DIR / "index.html")
+def homepage(request: Request):
+    return templates.TemplateResponse(
+        request=request,
+        name="index.html",
+        context={},
+    )
 
 
 @app.get("/api/health")
