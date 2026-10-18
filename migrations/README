@@ -1,0 +1,732 @@
+# Felix Business Manager
+
+**A modern business management application for managing clients, projects, and business interactions in one centralized workspace.**
+
+Felix Business Manager is a web-based application built to help individuals and businesses organize client relationships, monitor project progress, and maintain records of important business communications.
+
+The application uses **FastAPI** for its backend, **PostgreSQL** for persistent data storage, and a frontend developed with **HTML, CSS, and vanilla JavaScript**.
+
+---
+
+## Table of Contents
+
+1. [Overview](#overview)
+2. [Key Features](#key-features)
+3. [Technology Stack](#technology-stack)
+4. [Application Architecture](#application-architecture)
+5. [Project Structure](#project-structure)
+6. [System Requirements](#system-requirements)
+7. [Installation and Setup](#installation-and-setup)
+8. [Environment Configuration](#environment-configuration)
+9. [Running the Application](#running-the-application)
+10. [Using the Application](#using-the-application)
+11. [API Documentation](#api-documentation)
+12. [Database Design](#database-design)
+13. [Authentication and Security](#authentication-and-security)
+14. [Troubleshooting](#troubleshooting)
+15. [Development Workflow](#development-workflow)
+16. [Deployment Considerations](#deployment-considerations)
+17. [Future Improvements](#future-improvements)
+18. [Contributing](#contributing)
+19. [License](#license)
+20. [Author](#author)
+
+---
+
+## 1. Overview
+
+Felix Business Manager provides a centralized workspace for organizing essential business activities.
+
+Rather than maintaining client details, project records, and communication histories across disconnected documents, the application brings these functions together through a single interface.
+
+The application follows a frontend-backend architecture:
+
+- **Frontend:** Provides the interface through which users interact with the application.
+- **Backend:** Handles HTTP requests, validates submitted data, and executes application logic through FastAPI.
+- **Database:** Uses PostgreSQL to store business records persistently.
+- **Authentication:** Provides registration, login, and token-based authentication functionality.
+
+The application is designed to be maintainable and extensible, providing a foundation for additional business management features as the project develops.
+
+## 2. Key Features
+
+### 2.1 User Authentication
+
+The authentication module supports the application's account and access-management workflow.
+
+Features include:
+
+- User registration.
+- User login.
+- Token-based authentication using JWT.
+- Retrieval of the currently authenticated user.
+- Password recovery and reset endpoints.
+
+The precise password-recovery process depends on the implementation and configuration of the relevant backend services.
+
+### 2.2 Client Management
+
+The client management module provides functionality for organizing client information.
+
+Client records support:
+
+- Full name.
+- Email address.
+- Telephone number.
+- Company name.
+- Notes.
+- Creation and update timestamps.
+
+Users can create, view, edit, and delete client records through the application's interface.
+
+### 2.3 Project Management
+
+The project management module enables users to organize work associated with clients.
+
+Project records support:
+
+- Project title.
+- Associated client.
+- Description.
+- Project status.
+- Optional budget.
+- Due date.
+- Creation and update timestamps.
+
+Supported project statuses include:
+
+- `planned`
+- `in_progress`
+- `completed`
+- `on_hold`
+
+Associating projects with clients helps keep business activities organized around the relevant customer relationship.
+
+### 2.4 Interaction Tracking
+
+The interaction module allows users to maintain records of communications and other client-related activities.
+
+Supported interaction types include:
+
+- `call`
+- `meeting`
+- `email`
+- `note`
+
+Interaction records can contain:
+
+- Associated client.
+- Optional associated project.
+- Interaction type.
+- Subject.
+- Details.
+- Date and time of occurrence.
+
+This provides a historical record of important business conversations and activities.
+
+### 2.5 Dashboard and Workspace
+
+The dashboard provides a central entry point to the application's major business management functions.
+
+Depending on the available backend data, the dashboard can display business summaries and recent interaction activity.
+
+The frontend also includes workspace navigation and account controls intended to make the application easier to navigate.
+
+---
+
+## 3. Technology Stack
+
+| Component | Technology |
+|---|---|
+| Programming language | Python |
+| Backend framework | FastAPI |
+| ASGI server | Uvicorn |
+| Database | PostgreSQL |
+| Data validation | Pydantic |
+| Frontend markup | HTML5 |
+| Frontend styling | CSS3 |
+| Frontend scripting | JavaScript |
+| Authentication | JWT-based authentication |
+| API architecture | REST |
+| Version control | Git |
+| Repository hosting | GitHub |
+
+Dependency versions should be taken from the project's actual dependency files.
+
+---
+
+## 4. Application Architecture
+
+Felix Business Manager separates the user interface from backend application logic while allowing them to communicate through HTTP requests.
+
+The typical request flow is:
+
+1. A user interacts with the frontend in a web browser.
+2. JavaScript sends a request to a FastAPI endpoint.
+3. FastAPI validates the request against the applicable schema.
+4. The backend performs the required operation.
+5. PostgreSQL stores or retrieves the relevant information.
+6. The backend returns a response.
+7. The frontend updates the interface using the returned data.
+
+This structure makes it possible to improve the frontend, extend the API, or integrate other clients without requiring the entire application to be rewritten.
+
+---
+
+## 5. Project Structure
+
+The application has been developed around the following structure. Adjust the example to reflect the exact files in your repository.
+
+```text
+felix-business-manager/
+│
+├── app/
+│   ├── api/
+│   │   ├── auth.py
+│   │   ├── clients.py
+│   │   ├── projects.py
+│   │   └── interactions.py
+│   │
+│   ├── schemas/
+│   │   ├── __init__.py
+│   │   ├── auth.py
+│   │   ├── client.py
+│   │   ├── project.py
+│   │   └── interaction.py
+│   │
+│   ├── static/
+│   │   ├── css/
+│   │   │   └── style.css
+│   │   └── js/
+│   │       └── app.js
+│   │
+│   ├── templates/
+│   │   └── index.html
+│   │
+│   └── main.py
+│
+├── .env.example
+├── .gitignore
+├── requirements.txt
+└── README.md
+```
+
+### Directory responsibilities
+
+**`app/main.py`**
+
+The application's entry point, responsible for initializing the FastAPI application and registering the relevant application components.
+
+**`app/api/`**
+
+Contains the API route modules for authentication, clients, projects, and interactions.
+
+**`app/schemas/`**
+
+Contains Pydantic schemas used to validate incoming request data and define structured API responses.
+
+**`app/templates/`**
+
+Contains the HTML templates rendered by the application.
+
+**`app/static/css/`**
+
+Contains the styles used to control the frontend's visual presentation.
+
+**`app/static/js/`**
+
+Contains the JavaScript responsible for frontend interactions, API requests, and dynamic interface updates.
+
+**`requirements.txt`**
+
+Lists the Python packages required to run the application, where this file is used for dependency management.
+
+**`.env.example`**
+
+Provides an example of the application's required environment variables, using placeholders rather than real credentials.
+
+---
+
+## 6. System Requirements
+
+Before installing the application, ensure the following are available:
+
+- Python 3.10 or a version compatible with the project's dependencies.
+- PostgreSQL.
+- Python's virtual environment support.
+- `pip`.
+- Git, if cloning or managing the repository.
+- A modern web browser.
+- A code editor such as Visual Studio Code.
+
+Verify your Python installation:
+
+```bash
+python3 --version
+```
+
+Verify Git:
+
+```bash
+git --version
+```
+
+---
+
+## 7. Installation and Setup
+
+### Step 1: Obtain the project
+
+Clone the GitHub repository:
+
+```bash
+git clone https://github.com/YOUR-USERNAME/felix-business-manager.git
+```
+
+Navigate into the project directory:
+
+```bash
+cd felix-business-manager
+```
+
+Replace `YOUR-USERNAME` with the GitHub username or organization that owns the repository.
+
+If the project is already on your computer, navigate to the existing directory instead:
+
+```bash
+cd ~/projects/felix-business-manager
+```
+
+### Step 2: Create a virtual environment
+
+On Linux or ChromeOS Linux:
+
+```bash
+python3 -m venv .venv
+```
+
+Activate it:
+
+```bash
+source .venv/bin/activate
+```
+
+A successful activation normally displays `(.venv)` at the beginning of the terminal prompt.
+
+### Step 3: Install dependencies
+
+If the project contains `requirements.txt`, run:
+
+```bash
+python -m pip install --upgrade pip
+pip install -r requirements.txt
+```
+
+Use the dependency management method already configured in the repository if it differs.
+
+### Step 4: Configure PostgreSQL
+
+Ensure PostgreSQL is running and that a database and database user have been configured for the application.
+
+For a new database, an administrator could use SQL similar to the following:
+
+```sql
+CREATE DATABASE felix_business_manager;
+CREATE USER felix_business_user
+WITH PASSWORD 'REPLACE_WITH_A_STRONG_PASSWORD';
+
+GRANT ALL PRIVILEGES
+ON DATABASE felix_business_manager
+TO felix_business_user;
+```
+
+Use a strong, unique password.
+
+Depending on the PostgreSQL version and the application's schema setup, additional permissions may be necessary. Do not run these commands against an existing production database without understanding their effects.
+
+### Step 5: Configure environment variables
+
+If the project includes `.env.example`, create your local configuration file:
+
+```bash
+cp .env.example .env
+```
+
+Open `.env` in VS Code and enter the values required by the application's configuration module.
+
+For example, the application might use settings similar to:
+
+```dotenv
+DATABASE_URL=postgresql://felix_business_user:YOUR_PASSWORD@localhost:5432/felix_business_manager
+SECRET_KEY=REPLACE_WITH_A_LONG_RANDOM_SECRET
+```
+
+These names are illustrative. Use the exact variable names and database URL format expected by your existing configuration code.
+
+**Never commit the real `.env` file to GitHub.**
+
+### Step 6: Initialize the database schema
+
+Follow the database initialization method already implemented in the project.
+
+If the application uses Alembic migrations, the command may be:
+
+```bash
+alembic upgrade head
+```
+
+Only run this if Alembic is configured.
+
+If the application creates its tables through another startup or initialization process, follow that implementation instead.
+
+---
+
+## 8. Running the Application
+
+From the project root, activate the virtual environment:
+
+```bash
+source .venv/bin/activate
+```
+
+Start the development server:
+
+```bash
+python -m uvicorn app.main:app --reload
+```
+
+When startup succeeds, open the following addresses.
+
+| Resource | URL |
+|---|---|
+| Web application | http://127.0.0.1:8000 |
+| Interactive API documentation | http://127.0.0.1:8000/docs |
+| Alternative API documentation | http://127.0.0.1:8000/redoc |
+
+The documentation pages are available when enabled in the FastAPI configuration.
+
+To stop the server, press `Ctrl+C` in the terminal running Uvicorn.
+
+**Note:** `--reload` is intended for local development, not production deployment.
+
+---
+
+## 9. Using the Application
+
+A typical workflow is:
+
+1. Open the application in your browser.
+2. Register an account if registration is enabled, or sign in.
+3. Create a client record.
+4. Create a project and associate it with the relevant client.
+5. Record an interaction, such as a call, meeting, email, or note.
+6. Review the dashboard and the relevant client, project, and interaction records.
+7. Refresh the page to confirm that saved records remain available.
+
+Use test data when validating the application. Avoid entering confidential business information into an environment that has not been secured for that purpose.
+
+---
+
+## 10. API Documentation
+
+FastAPI generates interactive documentation from the registered routes and schemas.
+
+Start the application and visit:
+
+```text
+http://127.0.0.1:8000/docs
+```
+
+The endpoint table below reflects the routes used during development. Verify the complete list, request formats, and authentication requirements in the running API documentation.
+
+| Method | Endpoint | Purpose |
+|---|---|---|
+| `POST` | `/api/auth/register` | Register an account |
+| `POST` | `/api/auth/login` | Authenticate a user |
+| `POST` | `/api/auth/forgot-password` | Initiate password recovery |
+| `POST` | `/api/auth/reset-password` | Reset a password |
+| `GET` | `/api/auth/me` | Retrieve the current user |
+| `GET` | `/api/clients` | List clients |
+| `POST` | `/api/clients` | Create a client |
+| `PATCH` | `/api/clients/{client_id}` | Update a client |
+| `DELETE` | `/api/clients/{client_id}` | Delete a client |
+| `GET` | `/api/projects` | List projects |
+| `POST` | `/api/projects` | Create a project |
+| `PATCH` | `/api/projects/{project_id}` | Update a project |
+| `DELETE` | `/api/projects/{project_id}` | Delete a project |
+| `GET` | `/api/interactions` | List interactions |
+| `POST` | `/api/interactions` | Create an interaction |
+| `PATCH` | `/api/interactions/{interaction_id}` | Update an interaction |
+| `DELETE` | `/api/interactions/{interaction_id}` | Delete an interaction |
+
+The exact behavior of each endpoint, including error responses, filtering, and authorization, is defined by the current backend implementation.
+
+### Example: Create a client
+
+```json
+{
+  "full_name": "Alex Morgan",
+  "email": "alex@example.com",
+  "phone": "+2348000000000",
+  "company": "Example Company",
+  "notes": "Initial consultation"
+}
+```
+
+### Example: Create a project
+
+```json
+{
+  "client_id": 1,
+  "title": "Website Redesign",
+  "description": "Refresh the company website",
+  "status": "planned",
+  "budget": 150000,
+  "due_date": "2026-12-15"
+}
+```
+
+The budget is optional in the schema used during development. Omit it if no budget has been specified or the current frontend does not provide a budget field.
+
+### Example: Create an interaction
+
+```json
+{
+  "client_id": 1,
+  "project_id": 1,
+  "interaction_type": "meeting",
+  "subject": "Project kickoff",
+  "details": "Discussed objectives and next steps",
+  "occurred_at": "2026-10-18T10:00:00Z"
+}
+```
+
+Supported interaction types are `call`, `meeting`, `email`, and `note`.
+
+The `project_id` and `occurred_at` fields may be optional, depending on the endpoint's schema.
+
+### Authentication
+
+For endpoints requiring JWT authentication, include the access token in the request header:
+
+```http
+Authorization: Bearer YOUR_ACCESS_TOKEN
+```
+
+Do not hardcode real tokens in the frontend source code or publish them in documentation.
+
+---
+
+## 11. Database Design
+
+The core business data is organized around three principal record types.
+
+### Clients
+
+Stores contact and company information, together with optional notes and timestamps.
+
+### Projects
+
+Stores project details, status, and optional budget and due-date information. Projects are associated with clients through `client_id`.
+
+### Interactions
+
+Stores communication and activity records. Each interaction is associated with a client and may also be associated with a project.
+
+The application also maintains authentication-related data.
+
+The exact table definitions, relationships, indexes, deletion behavior, and migration strategy are determined by the SQLAlchemy models and database configuration in the repository.
+
+Before changing the database structure, inspect those definitions and make an appropriate backup.
+
+---
+
+## 12. Authentication and Security
+
+Security should be considered throughout development and deployment.
+
+Recommended practices include:
+
+- Keep secret keys, database credentials, and API keys outside the source code.
+- Use a strong, randomly generated secret key.
+- Store passwords using a secure password-hashing algorithm.
+- Configure token expiration and validate tokens on protected routes.
+- Enforce authorization checks so users can access only records they are permitted to access.
+- Validate incoming request data.
+- Avoid exposing internal stack traces or secrets in production error responses.
+- Use HTTPS for public deployments.
+- Restrict database access to trusted services.
+- Configure CORS to allow only required origins.
+- Consider rate limiting for login and password-recovery endpoints.
+- Back up the database and periodically test restoration.
+- Avoid logging passwords, access tokens, and confidential client data.
+
+These are security recommendations, not a claim that every measure is already implemented.
+
+Before deploying the application for real business use, review its authentication, authorization, password-recovery, and database-access logic.
+
+---
+
+## 13. Troubleshooting
+
+### Module import errors
+
+If Python cannot locate the `app` package, confirm that you are running the command from the project root and that the virtual environment is activated.
+
+```bash
+cd ~/projects/felix-business-manager
+source .venv/bin/activate
+pip install -r requirements.txt
+```
+
+### Port already in use
+
+If port `8000` is occupied, start the development server on another port:
+
+```bash
+python -m uvicorn app.main:app --reload --port 8001
+```
+
+Then open:
+
+```text
+http://127.0.0.1:8001
+```
+
+### Database connection errors
+
+Check that PostgreSQL is running and verify the configured host, port, database name, username, and password.
+
+Also confirm that the database driver and connection-string format match the application's configuration.
+
+### Authentication errors
+
+If an endpoint returns `401 Unauthorized` or `403 Forbidden`, check whether the user is signed in, whether the token is valid, and whether the endpoint requires additional permissions.
+
+### Validation errors
+
+A `422 Unprocessable Entity` response commonly means the request data does not match the schema.
+
+Examples include:
+
+- Using `name` instead of `full_name` for a client.
+- Using `name` instead of `title` for a project.
+- Using `type` instead of `interaction_type` for an interaction.
+- Submitting a project status or interaction type that is not supported.
+
+Use `/docs` to inspect the required fields and allowed values.
+
+### Frontend changes are not visible
+
+Refresh the page and inspect the browser's developer console and Network panel.
+
+Check the Uvicorn terminal for backend errors, confirm that the frontend is requesting the correct endpoint, and verify that the API response contains the expected data.
+
+---
+
+## 14. Development Workflow
+
+A recommended workflow for extending the project is:
+
+1. Create a Git branch for the proposed change.
+2. Make a focused change to the relevant backend or frontend files.
+3. Run the application locally.
+4. Test the affected functionality in the browser and API documentation.
+5. Review the changes and ensure no secrets are included.
+6. Commit the changes with a descriptive message.
+7. Push the branch to GitHub for review.
+
+Useful commands:
+
+```bash
+git status
+git diff
+git add .
+git commit -m "Describe the change"
+git push
+```
+
+Review `git status` before committing to avoid accidentally including environment files, database dumps, or other sensitive information.
+
+---
+
+## 15. Deployment Considerations
+
+The local development server is not a complete production deployment solution.
+
+A production environment typically requires:
+
+- A hosted PostgreSQL database with appropriate backups.
+- A production-ready ASGI server configuration.
+- Secure environment-variable or secrets-manager configuration.
+- HTTPS and suitable host and CORS settings.
+- A defined database migration and rollback strategy.
+- Error monitoring and application logging.
+- A backup and recovery procedure.
+- A process for creating the initial account or administrator, where applicable.
+
+Before selecting a hosting provider, verify the application's startup command, database driver, environment variable names, template and static-file handling, and database initialization strategy.
+
+Test the deployed application in a staging environment before using real client data.
+
+---
+
+## 16. Future Improvements
+
+Potential areas for future development include:
+
+- More detailed business analytics and dashboard visualizations.
+- Advanced client and project search and filtering.
+- Project budget reporting and financial summaries.
+- Reminders for upcoming project deadlines.
+- Export functionality for business records.
+- Pagination for large datasets.
+- Automated backend and frontend tests.
+- Role-based access control.
+- Audit logs for important changes.
+- Improved database migration management.
+- Automated deployment and continuous integration.
+- Responsive refinements and accessibility improvements.
+
+These are possible future enhancements and should not be interpreted as features already implemented.
+
+---
+
+## 17. Contributing
+
+Suggestions, bug reports, and contributions are welcome.
+
+To propose a change:
+
+1. Fork the repository.
+2. Create a feature branch.
+3. Implement and test your change.
+4. Submit a pull request describing the change and the tests performed.
+
+For bug reports, include the affected feature, steps to reproduce the issue, and relevant sanitized error messages.
+
+Never include passwords, authentication tokens, database credentials, or confidential client information in issues or pull requests.
+
+---
+
+## 18. License
+
+No license has been specified here.
+
+Before distributing the software or accepting external contributions, choose an appropriate license and add a corresponding `LICENSE` file to the repository.
+
+Until a license is added, do not assume that the code is available for unrestricted reuse simply because it is hosted on GitHub.
+
+---
+
+## 19. Author
+
+**Felix Ogunbowale**
+
+**Project:** Felix Business Manager
+
+**Technologies:** Python, FastAPI, PostgreSQL, HTML, CSS, and JavaScript.
+
+---
+
+*Felix Business Manager — bringing clients, projects, and business interactions together in one organized workspace.*

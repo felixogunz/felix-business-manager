@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#172b24">
+    <title>Felix Business Manager</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div class="app-shell">
+        <aside class="sidebar" id="sidebar">
+            <div class="brand">
+                <div class="brand-logo">F</div>
+                <div>
+                    <h2>Felix</h2>
+                    <span>Business Manager</span>
+                </div>
+            </div>
+
+            <p class="nav-label">WORKSPACE</p>
+            <nav class="navigation">
+                <button class="nav-item active" data-view="dashboard">▦ <span>Dashboard</span></button>
+                <button class="nav-item" data-view="clients">♙ <span>Clients</span></button>
+                <button class="nav-item" data-view="projects">▣ <span>Projects</span></button>
+                <button class="nav-item" data-view="interactions">◷ <span>Interactions</span></button>
+            </nav>
+
+            <div class="sidebar-bottom">
+                <div class="profile-avatar">F</div>
+                <div>
+                    <strong>Business Workspace</strong>
+                    <span>Local application</span>
+                </div>
+            </div>
+        </aside>
+
+        <main class="main-area">
+            <header class="topbar">
+                <button class="menu-button" id="menu-button" aria-label="Toggle navigation">☰</button>
+                <div class="breadcrumb">Workspace <span>/</span> <strong id="page-breadcrumb">Dashboard</strong></div>
+                <div class="topbar-status"><span class="status-dot"></span> Local workspace</div>
+            </header>
+
+            <div class="content">
+                <div id="notification" class="notification" role="status" aria-live="polite"></div>
+
+                <section class="view active" id="view-dashboard">
+                    <div class="page-heading">
+                        <div>
+                            <p class="eyebrow">OVERVIEW</p>
+                            <h1>Good to see you.</h1>
+                            <p class="muted">Here is what's happening in your business.</p>
+                        </div>
+                        <button class="primary-button" data-go="clients">＋ Add a client</button>
+                    </div>
+
+                    <div class="stat-grid">
+                        <article class="stat-card">
+                            <div class="stat-icon blue">♙</div>
+                            <p>Total clients</p>
+                            <h2 id="stat-clients">—</h2>
+                            <span>Clients in your records</span>
+                        </article>
+                        <article class="stat-card">
+                            <div class="stat-icon purple">▣</div>
+                            <p>Total projects</p>
+                            <h2 id="stat-projects">—</h2>
+                            <span>Projects being tracked</span>
+                        </article>
+                        <article class="stat-card">
+                            <div class="stat-icon green">↗</div>
+                            <p>Active projects</p>
+                            <h2 id="stat-active">—</h2>
+                            <span>Currently in progress</span>
+                        </article>
+                        <article class="stat-card">
+                            <div class="stat-icon amber">◷</div>
+                            <p>Interactions</p>
+                            <h2 id="stat-interactions">—</h2>
+                            <span>Recorded communications</span>
+                        </article>
+                    </div>
+
+                    <article class="panel">
+                        <div class="panel-heading">
+                            <div>
+                                <h2>Recent interactions</h2>
+                                <p class="muted">Your latest client communications.</p>
+                            </div>
+                            <button class="secondary-button" data-go="interactions">View all</button>
+                        </div>
+                        <div id="recent-interactions" class="table-wrap">
+                            <p class="empty-state">Loading activity…</p>
+                        </div>
+                    </article>
+
+                    <div class="quick-grid">
+                        <button class="quick-card" data-go="clients">
+                            <span class="quick-icon">♙</span>
+                            <strong>Manage clients</strong>
+                            <span>Add and update client records →</span>
+                        </button>
+                        <button class="quick-card" data-go="projects">
+                            <span class="quick-icon">▣</span>
+                            <strong>Track projects</strong>
+                            <span>Monitor deadlines and status →</span>
+                        </button>
+                        <button class="quick-card" data-go="interactions">
+                            <span class="quick-icon">◷</span>
+                            <strong>Log an interaction</strong>
+                            <span>Keep a history of communications →</span>
+                        </button>
+                    </div>
+                </section>
+
+                <section class="view" id="view-clients">
+                    <div class="page-heading">
+                        <div>
+                            <p class="eyebrow">RELATIONSHIPS</p>
+                            <h1>Clients</h1>
+                            <p class="muted">Keep all your client information in one place.</p>
+                        </div>
+                    </div>
+
+                    <article class="panel">
+                        <div class="panel-heading"><h2>Add a client</h2></div>
+                        <form id="client-form" class="form-grid">
+                            <label>Full name *
+                                <input name="full_name" required maxlength="150" placeholder="Client's full name">
+                            </label>
+                            <label>Email
+                                <input name="email" type="email" maxlength="255" placeholder="name@example.com">
+                            </label>
+                            <label>Phone
+                                <input name="phone" maxlength="30" placeholder="Phone number">
+                            </label>
+                            <label>Company
+                                <input name="company" maxlength="150" placeholder="Company name">
+                            </label>
+                            <label class="full-width">Notes
+                                <textarea name="notes" rows="3" placeholder="Additional information"></textarea>
+                            </label>
+                            <div class="full-width form-actions">
+                                <button class="primary-button" type="submit">Save client</button>
+                            </div>
+                        </form>
+                    </article>
+
+                    <article class="panel">
+                        <div class="panel-heading">
+                            <div><h2>Client directory</h2><p class="muted">Search and manage your saved clients.</p></div>
+                            <input id="client-search" class="search-input" placeholder="Search clients…">
+                        </div>
+                        <div id="clients-list" class="table-wrap"></div>
+                    </article>
+                </section>
+
+                <section class="view" id="view-projects">
+                    <div class="page-heading">
+                        <div>
+                            <p class="eyebrow">DELIVERY</p>
+                            <h1>Projects</h1>
+                            <p class="muted">Track work, budgets, and deadlines.</p>
+                        </div>
+                    </div>
+
+                    <article class="panel">
+                        <div class="panel-heading"><h2>Create a project</h2></div>
+                        <form id="project-form" class="form-grid">
+                            <label>Client *
+                                <select name="client_id" id="project-client" required></select>
+                            </label>
+                            <label>Project title *
+                                <input name="title" required maxlength="200" placeholder="Project name">
+                            </label>
+                            <label>Status
+                                <select name="status">
+                                    <option value="planned">Planned</option>
+                                    <option value="in_progress">In progress</option>
+                                    <option value="completed">Completed</option>
+                                    <option value="on_hold">On hold</option>
+                                </select>
+                            </label>
+                            <label>Budget (NGN)
+                                <input name="budget" type="number" min="0" step="0.01" placeholder="0.00">
+                            </label>
+                            <label>Due date
+                                <input name="due_date" type="date">
+                            </label>
+                            <label class="full-width">Description
+                                <textarea name="description" rows="3" placeholder="What needs to be delivered?"></textarea>
+                            </label>
+                            <div class="full-width form-actions">
+                                <button class="primary-button" type="submit">Save project</button>
+                            </div>
+                        </form>
+                    </article>
+
+                    <article class="panel">
+                        <div class="panel-heading"><h2>Project register</h2></div>
+                        <div id="projects-list" class="table-wrap"></div>
+                    </article>
+                </section>
+
+                <section class="view" id="view-interactions">
+                    <div class="page-heading">
+                        <div>
+                            <p class="eyebrow">COMMUNICATION</p>
+                            <h1>Interactions</h1>
+                            <p class="muted">Maintain a useful history of client conversations.</p>
+                        </div>
+                    </div>
+
+                    <article class="panel">
+                        <div class="panel-heading"><h2>Record an interaction</h2></div>
+                        <form id="interaction-form" class="form-grid">
+                            <label>Client *
+                                <select name="client_id" id="interaction-client" required></select>
+                            </label>
+                            <label>Related project
+                                <select name="project_id" id="interaction-project"></select>
+                            </label>
+                            <label>Type *
+                                <select name="interaction_type" required>
+                                    <option value="call">Call</option>
+                                    <option value="meeting">Meeting</option>
+                                    <option value="email">Email</option>
+                                    <option value="note">Note</option>
+                                </select>
+                            </label>
+                            <label>Subject *
+                                <input name="subject" required maxlength="200" placeholder="Brief subject">
+                            </label>
+                            <label class="full-width">Details
+                                <textarea name="details" rows="3" placeholder="Summary, decisions, or next steps"></textarea>
+                            </label>
+                            <div class="full-width form-actions">
+                                <button class="primary-button" type="submit">Save interaction</button>
+                            </div>
+                        </form>
+                    </article>
+
+                    <article class="panel">
+                        <div class="panel-heading"><h2>Interaction history</h2></div>
+                        <div id="interactions-list" class="table-wrap"></div>
+                    </article>
+                </section>
+
+                <footer class="footer">
+                    Felix Business Manager <span>·</span> Organise your business with clarity.
+                </footer>
+            </div>
+        </main>
+    </div>
+
+    <script src="/static/js/app.js" defer></script>
+</body>
+</html>

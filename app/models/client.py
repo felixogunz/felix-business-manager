@@ -1,12 +1,13 @@
 from datetime import datetime
 from typing import TYPE_CHECKING
 
-from sqlalchemy import DateTime, String, Text, func
+from sqlalchemy import DateTime, ForeignKey, String, Text, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base
 
 if TYPE_CHECKING:
+    from app.models.user import User
     from app.models.project import Project
     from app.models.interaction import Interaction
 
@@ -14,7 +15,17 @@ if TYPE_CHECKING:
 class Client(Base):
     __tablename__ = "clients"
 
-    id: Mapped[int] = mapped_column(primary_key=True, index=True)
+    id: Mapped[int] = mapped_column(
+        primary_key=True,
+        index=True,
+    )
+
+    # Associates each client with the user who owns the record.
+    user_id: Mapped[int] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
 
     full_name: Mapped[str] = mapped_column(
         String(150),
@@ -53,6 +64,12 @@ class Client(Base):
         server_default=func.now(),
         onupdate=func.now(),
         nullable=False,
+    )
+
+    # Relationship to the account that owns this client.
+    user: Mapped["User"] = relationship(
+        "User",
+        back_populates="clients",
     )
 
     projects: Mapped[list["Project"]] = relationship(

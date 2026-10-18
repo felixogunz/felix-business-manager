@@ -3,257 +3,695 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="#172b24">
+    <meta name="theme-color" content="#102c27">
+    <meta name="description" content="Felix Business Manager — manage clients, projects, and business relationships in one private workspace.">
     <title>Felix Business Manager</title>
     <link rel="stylesheet" href="/static/css/style.css">
+    <script src="/static/js/app.js" defer></script>
 </head>
 <body>
-    <div class="app-shell">
-        <aside class="sidebar" id="sidebar">
-            <div class="brand">
-                <div class="brand-logo">F</div>
-                <div>
-                    <h2>Felix</h2>
-                    <span>Business Manager</span>
+    <div class="ambient ambient-one"></div>
+    <div class="ambient ambient-two"></div>
+
+    <!-- AUTHENTICATION -->
+    <main id="login-screen" class="login-screen" hidden>
+        <section class="auth-visual">
+            <a class="brand auth-brand" id="brand-home-link" href="/">
+                <span class="brand-mark">F<span>.</span></span>
+                <span class="brand-copy">
+                    <strong>Felix</strong>
+                    <small>BUSINESS MANAGER</small>
+                </span>
+            </a>
+
+            <div class="auth-visual-content">
+                <span class="eyebrow"><span class="status-dot"></span> YOUR BUSINESS, IN FOCUS</span>
+
+                <h1>Build better<br>relationships.<br><span>Do your best work.</span></h1>
+
+                <p>One calm, organized space for your clients, projects, and the details that move your business forward.</p>
+
+                <div class="visual-metrics">
+                    <div class="visual-metric">
+                        <span class="metric-symbol">↗</span>
+                        <div>
+                            <strong>Stay organized</strong>
+                            <small>Every client, one workspace</small>
+                        </div>
+                    </div>
+
+                    <div class="visual-metric">
+                        <span class="metric-symbol">◇</span>
+                        <div>
+                            <strong>Keep momentum</strong>
+                            <small>Track work from start to finish</small>
+                        </div>
+                    </div>
+
+                    <div class="visual-metric">
+                        <span class="metric-symbol">✓</span>
+                        <div>
+                            <strong>Work privately</strong>
+                            <small>Your own account and records</small>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <p class="nav-label">WORKSPACE</p>
-            <nav class="navigation">
-                <button class="nav-item active" data-view="dashboard">▦ <span>Dashboard</span></button>
-                <button class="nav-item" data-view="clients">♙ <span>Clients</span></button>
-                <button class="nav-item" data-view="projects">▣ <span>Projects</span></button>
-                <button class="nav-item" data-view="interactions">◷ <span>Interactions</span></button>
+            <p class="auth-visual-footer">Thoughtfully built for better business.</p>
+        </section>
+
+        <section class="auth-panel">
+            <div class="auth-panel-top">
+                <span class="mobile-brand">F<span>.</span> Felix Business Manager</span>
+                <span class="secure-label"><span class="secure-dot"></span> Secure workspace</span>
+            </div>
+
+            <div class="auth-card">
+                <div class="auth-heading-icon">✳</div>
+                <p class="eyebrow">YOUR NEXT CHAPTER STARTS HERE</p>
+                <h2 id="login-heading">Welcome back</h2>
+
+                <p id="login-description" class="auth-description">
+                    Sign in to manage your clients, projects, and business activity.
+                </p>
+
+                <div id="login-error" class="auth-message" role="status" aria-live="polite" hidden></div>
+
+                <form id="login-form" class="auth-form">
+                    <label for="login-email">Email address</label>
+                    <input id="login-email" name="email" type="email" placeholder="you@example.com" autocomplete="email" required>
+
+                    <div class="label-row">
+                        <label for="login-password">Password</label>
+                        <button type="button" class="text-button" data-auth-mode="forgot">Forgot password?</button>
+                    </div>
+
+                    <input id="login-password" name="password" type="password" placeholder="Enter your password" autocomplete="current-password" required>
+
+                    <button id="login-submit" class="primary-button auth-submit" type="submit">
+                        Sign in <span>→</span>
+                    </button>
+                </form>
+
+                <form id="register-form" class="auth-form" hidden>
+                    <label for="register-name">Full name</label>
+                    <input id="register-name" name="full_name" type="text" placeholder="Your full name" autocomplete="name" minlength="2" required>
+
+                    <label for="register-email">Email address</label>
+                    <input id="register-email" name="email" type="email" placeholder="you@example.com" autocomplete="email" required>
+
+                    <label for="register-password">Create password</label>
+                    <input id="register-password" name="password" type="password" placeholder="At least 12 characters" autocomplete="new-password" minlength="12" required>
+
+                    <p class="field-hint">Use at least 12 characters for your password.</p>
+
+                    <button id="register-submit" class="primary-button auth-submit" type="submit">
+                        Create account <span>→</span>
+                    </button>
+                </form>
+
+                <form id="forgot-form" class="auth-form" hidden>
+                    <label for="forgot-email">Account email address</label>
+                    <input id="forgot-email" name="email" type="email" placeholder="you@example.com" autocomplete="email" required>
+
+                    <p class="field-hint">If an account exists for this email, we'll send you a password-reset link.</p>
+
+                    <button id="forgot-submit" class="primary-button auth-submit" type="submit">
+                        Send reset link <span>→</span>
+                    </button>
+                </form>
+
+                <form id="reset-form" class="auth-form" hidden>
+                    <label for="reset-password">New password</label>
+                    <input id="reset-password" name="new_password" type="password" placeholder="At least 12 characters" autocomplete="new-password" minlength="12" required>
+
+                    <label for="reset-password-confirm">Confirm new password</label>
+                    <input id="reset-password-confirm" name="password_confirmation" type="password" placeholder="Enter your new password again" autocomplete="new-password" minlength="12" required>
+
+                    <button id="reset-submit" class="primary-button auth-submit" type="submit">
+                        Reset password <span>→</span>
+                    </button>
+                </form>
+
+                <p id="auth-switch" class="auth-switch">
+                    New to Felix Business Manager?
+                    <button type="button" class="text-button" data-auth-mode="register">Create an account</button>
+                </p>
+
+                <p class="auth-privacy"><span>◇</span> Your business records belong to your account.</p>
+            </div>
+
+            <p class="auth-copyright">© <span id="auth-year"></span> Felix Business Manager</p>
+        </section>
+    </main>
+
+    <!-- APPLICATION -->
+    <div class="app-shell" id="app-shell" hidden>
+        <aside class="sidebar" id="sidebar">
+            <a class="brand sidebar-brand" href="#" data-view="dashboard">
+                <span class="brand-mark">F<span>.</span></span>
+                <span class="brand-copy">
+                    <strong>Felix</strong>
+                    <small>BUSINESS MANAGER</small>
+                </span>
+            </a>
+
+            <!-- INTERACTIVE WORKSPACE TILE -->
+            <button
+                type="button"
+                class="workspace-label workspace-switcher"
+                id="workspace-home-button"
+                aria-label="Open Business HQ dashboard"
+            >
+                <span class="workspace-icon" aria-hidden="true">◈</span>
+                <span class="workspace-copy">
+                    <small>YOUR WORKSPACE</small>
+                    <strong>Business HQ</strong>
+                </span>
+                <span class="workspace-arrow" aria-hidden="true">↗</span>
+            </button>
+
+            <nav class="sidebar-nav" aria-label="Main navigation">
+                <p class="nav-label">OVERVIEW</p>
+
+                <button class="nav-item active" type="button" data-view="dashboard">
+                    <span class="nav-icon">◫</span>
+                    <span>Dashboard</span>
+                    <span class="nav-arrow">↗</span>
+                </button>
+
+                <p class="nav-label">WORKSPACE</p>
+
+                <button class="nav-item" type="button" data-view="clients">
+                    <span class="nav-icon">♙</span>
+                    <span>Clients</span>
+                    <span class="nav-count" id="nav-client-count">0</span>
+                </button>
+
+                <button class="nav-item" type="button" data-view="projects">
+                    <span class="nav-icon">▤</span>
+                    <span>Projects</span>
+                    <span class="nav-count" id="nav-project-count">0</span>
+                </button>
+
+                <button class="nav-item" type="button" data-view="interactions">
+                    <span class="nav-icon">↗</span>
+                    <span>Interactions</span>
+                </button>
             </nav>
 
-            <div class="sidebar-bottom">
-                <div class="profile-avatar">F</div>
-                <div>
-                    <strong>Business Workspace</strong>
-                    <span>Local application</span>
+            <div class="sidebar-spacer"></div>
+
+            <!-- INTERACTIVE MOTIVATIONAL MESSAGE -->
+            <button
+                type="button"
+                class="sidebar-tip workspace-motivation"
+                id="motivation-button"
+                aria-label="Open interactions and follow-ups"
+            >
+                <span class="tip-icon motivation-icon" aria-hidden="true">✳</span>
+
+                <span class="motivation-copy">
+                    <strong>Small steps. Real progress.</strong>
+                    <span>Keep your relationships strong and your next steps clear.</span>
+                </span>
+
+                <span class="motivation-arrow" aria-hidden="true">→</span>
+            </button>
+
+            <!-- INTERACTIVE ACCOUNT PROFILE -->
+            <div class="profile-area">
+                <button
+                    type="button"
+                    class="sidebar-account profile-button"
+                    id="profile-button"
+                    aria-expanded="false"
+                    aria-controls="profile-menu"
+                >
+                    <span class="profile-avatar">F</span>
+
+                    <span class="account-copy profile-copy">
+                        <strong id="account-name">Felix Ogunbowale</strong>
+                        <small>Personal workspace</small>
+                    </span>
+
+                    <span class="profile-chevron" aria-hidden="true">⌄</span>
+                </button>
+
+                <div class="profile-menu" id="profile-menu" hidden>
+                    <div class="profile-menu-heading">
+                        <strong>Account</strong>
+                        <small id="profile-email">Your signed-in account</small>
+                    </div>
+
+                    <button
+                        type="button"
+                        class="profile-menu-action"
+                        id="profile-dashboard-button"
+                    >
+                        <span aria-hidden="true">⌂</span>
+                        Open dashboard
+                    </button>
+
+                    <button
+                        type="button"
+                        class="profile-menu-action profile-signout"
+                        id="profile-logout-button"
+                    >
+                        <span aria-hidden="true">↪</span>
+                        Sign out
+                    </button>
                 </div>
             </div>
+
+            <!-- Existing sign-out control retained for compatibility -->
+            <button
+                id="logout-button"
+                class="icon-button logout-button"
+                type="button"
+                title="Sign out"
+                aria-label="Sign out"
+            >
+                ↗
+            </button>
         </aside>
+
+        <div class="sidebar-backdrop" id="sidebar-backdrop"></div>
 
         <main class="main-area">
             <header class="topbar">
-                <button class="menu-button" id="menu-button" aria-label="Toggle navigation">☰</button>
-                <div class="breadcrumb">Workspace <span>/</span> <strong id="page-breadcrumb">Dashboard</strong></div>
-                <div class="topbar-status"><span class="status-dot"></span> Local workspace</div>
+                <div class="topbar-left">
+                    <button id="menu-button" class="icon-button menu-button" type="button" aria-label="Open navigation">☰</button>
+
+                    <div class="breadcrumbs">
+                        <span>Workspace</span>
+                        <span class="breadcrumb-slash">/</span>
+                        <strong id="page-breadcrumb">Dashboard</strong>
+                    </div>
+                </div>
+
+                <div class="topbar-right">
+                    <span class="today-label" id="today-label"></span>
+                    <span class="topbar-divider"></span>
+                    <div class="online-indicator"><span class="status-dot"></span> Workspace active</div>
+                    <div class="profile-avatar small-avatar">F</div>
+                </div>
             </header>
 
-            <div class="content">
-                <div id="notification" class="notification" role="status" aria-live="polite"></div>
+            <div id="notification" class="notification" role="status" aria-live="polite" hidden></div>
 
-                <section class="view active" id="view-dashboard">
-                    <div class="page-heading">
+            <div class="page-content">
+                <!-- DASHBOARD -->
+                <section id="view-dashboard" class="view-section">
+                    <div class="page-intro">
                         <div>
-                            <p class="eyebrow">OVERVIEW</p>
-                            <h1>Good to see you.</h1>
-                            <p class="muted">Here is what's happening in your business.</p>
+                            <p class="eyebrow"><span class="status-dot"></span> YOUR BUSINESS AT A GLANCE</p>
+                            <h1>Good to see you, <span id="greeting-name">there</span>.</h1>
+                            <p class="page-subtitle">Here's what's happening in your workspace today.</p>
                         </div>
-                        <button class="primary-button" data-go="clients">＋ Add a client</button>
+
+                        <button type="button" class="primary-button" data-view="clients" data-focus="client-name">+ Add a client</button>
                     </div>
 
-                    <div class="stat-grid">
-                        <article class="stat-card">
-                            <div class="stat-icon blue">♙</div>
-                            <p>Total clients</p>
-                            <h2 id="stat-clients">—</h2>
-                            <span>Clients in your records</span>
+                    <div class="welcome-banner">
+                        <div class="welcome-content">
+                            <span class="welcome-kicker">YOUR DAILY BRIEFING</span>
+                            <h2>Make room for meaningful progress.</h2>
+                            <p>Stay close to your clients, keep projects moving, and never lose track of a conversation.</p>
+                            <button type="button" class="banner-link" data-view="interactions">Review recent activity <span>→</span></button>
+                        </div>
+
+                        <div class="banner-art" aria-hidden="true">
+                            <div class="art-ring ring-one"></div>
+                            <div class="art-ring ring-two"></div>
+                            <div class="art-card">
+                                <span>✳</span>
+                                <strong>Progress</strong>
+                                <small>One step at a time</small>
+                                <div class="art-progress"><i></i></div>
+                            </div>
+                            <div class="art-sparkle sparkle-one">✦</div>
+                            <div class="art-sparkle sparkle-two">✧</div>
+                        </div>
+                    </div>
+
+                    <div class="section-heading">
+                        <div>
+                            <h2>Your overview</h2>
+                            <p>Live totals from your private workspace</p>
+                        </div>
+                        <span class="subtle-badge"><span class="status-dot"></span> Updated from your records</span>
+                    </div>
+
+                    <div class="stats-grid">
+                        <article class="stat-card stat-clients">
+                            <div class="stat-top"><span class="stat-icon">♙</span><span class="stat-caption">RELATIONSHIPS</span></div>
+                            <div class="stat-value" id="stat-clients">0</div>
+                            <h3>Total clients</h3>
+                            <p>People and businesses you work with</p>
+                            <button class="stat-link" type="button" data-view="clients">View clients <span>→</span></button>
                         </article>
-                        <article class="stat-card">
-                            <div class="stat-icon purple">▣</div>
-                            <p>Total projects</p>
-                            <h2 id="stat-projects">—</h2>
-                            <span>Projects being tracked</span>
+
+                        <article class="stat-card stat-projects">
+                            <div class="stat-top"><span class="stat-icon">▤</span><span class="stat-caption">DELIVERY</span></div>
+                            <div class="stat-value" id="stat-projects">0</div>
+                            <h3>Total projects</h3>
+                            <p>Work tracked in your workspace</p>
+                            <button class="stat-link" type="button" data-view="projects">View projects <span>→</span></button>
                         </article>
-                        <article class="stat-card">
-                            <div class="stat-icon green">↗</div>
-                            <p>Active projects</p>
-                            <h2 id="stat-active">—</h2>
-                            <span>Currently in progress</span>
+
+                        <article class="stat-card stat-active">
+                            <div class="stat-top"><span class="stat-icon">◷</span><span class="stat-caption">MOMENTUM</span></div>
+                            <div class="stat-value" id="stat-active">0</div>
+                            <h3>Active projects</h3>
+                            <p>Projects still in progress</p>
+                            <button class="stat-link" type="button" data-view="projects">Track progress <span>→</span></button>
                         </article>
-                        <article class="stat-card">
-                            <div class="stat-icon amber">◷</div>
-                            <p>Interactions</p>
-                            <h2 id="stat-interactions">—</h2>
-                            <span>Recorded communications</span>
+
+                        <article class="stat-card stat-interactions">
+                            <div class="stat-top"><span class="stat-icon">↗</span><span class="stat-caption">COMMUNICATION</span></div>
+                            <div class="stat-value" id="stat-interactions">0</div>
+                            <h3>Interactions</h3>
+                            <p>Recorded business touchpoints</p>
+                            <button class="stat-link" type="button" data-view="interactions">View interactions <span>→</span></button>
                         </article>
                     </div>
 
-                    <article class="panel">
-                        <div class="panel-heading">
+                    <div class="dashboard-grid">
+                        <section class="panel activity-panel">
+                            <div class="panel-header">
+                                <div>
+                                    <h2>Recent interactions</h2>
+                                    <p>Keep up with the latest conversations</p>
+                                </div>
+                                <button type="button" class="text-button" data-view="interactions">View all →</button>
+                            </div>
+
+                            <div id="recent-interactions" class="activity-list">
+                                <div class="loading-state">Loading your activity…</div>
+                            </div>
+                        </section>
+
+                        <section class="panel quick-panel">
+                            <div class="panel-header">
+                                <div>
+                                    <h2>Quick actions</h2>
+                                    <p>Keep things moving</p>
+                                </div>
+                            </div>
+
+                            <button class="quick-action" type="button" data-view="clients" data-focus="client-name">
+                                <span class="quick-icon quick-green">♙</span>
+                                <span><strong>Add a client</strong><small>Build a new relationship</small></span>
+                                <span class="quick-arrow">↗</span>
+                            </button>
+
+                            <button class="quick-action" type="button" data-view="projects" data-focus="project-name">
+                                <span class="quick-icon quick-gold">▤</span>
+                                <span><strong>Create a project</strong><small>Give new work a home</small></span>
+                                <span class="quick-arrow">↗</span>
+                            </button>
+
+                            <button class="quick-action" type="button" data-view="interactions" data-focus="interaction-title">
+                                <span class="quick-icon quick-blue">✎</span>
+                                <span><strong>Log an interaction</strong><small>Capture an important update</small></span>
+                                <span class="quick-arrow">↗</span>
+                            </button>
+
+                            <div class="quick-note">
+                                <span>✳</span>
+                                <p><strong>A helpful habit</strong><br>Record key conversations while the details are still fresh.</p>
+                            </div>
+                        </section>
+                    </div>
+                </section>
+
+                <!-- CLIENTS -->
+                <section id="view-clients" class="view-section" hidden>
+                    <div class="page-intro">
+                        <div>
+                            <p class="eyebrow">RELATIONSHIPS / DIRECTORY</p>
+                            <h1>Your clients.</h1>
+                            <p class="page-subtitle">A clear view of the people and businesses behind your work.</p>
+                        </div>
+                    </div>
+
+                    <section class="panel form-panel">
+                        <div class="panel-header">
                             <div>
-                                <h2>Recent interactions</h2>
-                                <p class="muted">Your latest client communications.</p>
+                                <h2 id="client-form-heading">Add a client</h2>
+                                <p>Keep important contact details in one place.</p>
                             </div>
-                            <button class="secondary-button" data-go="interactions">View all</button>
+                            <span class="form-step">01 / CLIENTS</span>
                         </div>
-                        <div id="recent-interactions" class="table-wrap">
-                            <p class="empty-state">Loading activity…</p>
-                        </div>
-                    </article>
 
-                    <div class="quick-grid">
-                        <button class="quick-card" data-go="clients">
-                            <span class="quick-icon">♙</span>
-                            <strong>Manage clients</strong>
-                            <span>Add and update client records →</span>
-                        </button>
-                        <button class="quick-card" data-go="projects">
-                            <span class="quick-icon">▣</span>
-                            <strong>Track projects</strong>
-                            <span>Monitor deadlines and status →</span>
-                        </button>
-                        <button class="quick-card" data-go="interactions">
-                            <span class="quick-icon">◷</span>
-                            <strong>Log an interaction</strong>
-                            <span>Keep a history of communications →</span>
-                        </button>
-                    </div>
-                </section>
+                        <form id="client-form" class="data-form">
+                            <input type="hidden" id="client-id">
 
-                <section class="view" id="view-clients">
-                    <div class="page-heading">
-                        <div>
-                            <p class="eyebrow">RELATIONSHIPS</p>
-                            <h1>Clients</h1>
-                            <p class="muted">Keep all your client information in one place.</p>
-                        </div>
-                    </div>
+                            <div class="form-grid">
+                                <div class="field">
+                                    <label for="client-name">Full name / business name *</label>
+                                    <input id="client-name" name="name" type="text" placeholder="e.g. Adeze Ejiofor" required>
+                                </div>
 
-                    <article class="panel">
-                        <div class="panel-heading"><h2>Add a client</h2></div>
-                        <form id="client-form" class="form-grid">
-                            <label>Full name *
-                                <input name="full_name" required maxlength="150" placeholder="Client's full name">
-                            </label>
-                            <label>Email
-                                <input name="email" type="email" maxlength="255" placeholder="name@example.com">
-                            </label>
-                            <label>Phone
-                                <input name="phone" maxlength="30" placeholder="Phone number">
-                            </label>
-                            <label>Company
-                                <input name="company" maxlength="150" placeholder="Company name">
-                            </label>
-                            <label class="full-width">Notes
-                                <textarea name="notes" rows="3" placeholder="Additional information"></textarea>
-                            </label>
-                            <div class="full-width form-actions">
-                                <button class="primary-button" type="submit">Save client</button>
+                                <div class="field">
+                                    <label for="client-email">Email address</label>
+                                    <input id="client-email" name="email" type="email" placeholder="client@example.com">
+                                </div>
+
+                                <div class="field">
+                                    <label for="client-phone">Phone number</label>
+                                    <input id="client-phone" name="phone" type="tel" placeholder="+234 …">
+                                </div>
+
+                                <div class="field">
+                                    <label for="client-company">Company</label>
+                                    <input id="client-company" name="company" type="text" placeholder="Company or organisation">
+                                </div>
+                            </div>
+
+                            <div class="field">
+                                <label for="client-notes">Notes</label>
+                                <textarea id="client-notes" name="notes" rows="3" placeholder="Preferences, background, or useful context…"></textarea>
+                            </div>
+
+                            <div class="form-actions">
+                                <button id="client-cancel" class="secondary-button" type="button" hidden>Cancel edit</button>
+                                <button id="client-submit" class="primary-button" type="submit">Save client <span>→</span></button>
                             </div>
                         </form>
-                    </article>
+                    </section>
 
-                    <article class="panel">
-                        <div class="panel-heading">
-                            <div><h2>Client directory</h2><p class="muted">Search and manage your saved clients.</p></div>
-                            <input id="client-search" class="search-input" placeholder="Search clients…">
+                    <section class="panel list-panel">
+                        <div class="panel-header">
+                            <div>
+                                <h2>Client directory</h2>
+                                <p id="clients-summary">Your clients, all in one place.</p>
+                            </div>
+
+                            <label class="search-box">
+                                <span>⌕</span>
+                                <input id="client-search" type="search" placeholder="Search clients…" aria-label="Search clients">
+                            </label>
                         </div>
-                        <div id="clients-list" class="table-wrap"></div>
-                    </article>
+
+                        <div id="clients-list" class="record-list">
+                            <div class="loading-state">Your client directory will appear here.</div>
+                        </div>
+                    </section>
                 </section>
 
-                <section class="view" id="view-projects">
-                    <div class="page-heading">
+                <!-- PROJECTS -->
+                <section id="view-projects" class="view-section" hidden>
+                    <div class="page-intro">
                         <div>
-                            <p class="eyebrow">DELIVERY</p>
-                            <h1>Projects</h1>
-                            <p class="muted">Track work, budgets, and deadlines.</p>
+                            <p class="eyebrow">DELIVERY / PROJECT TRACKER</p>
+                            <h1>Work in motion.</h1>
+                            <p class="page-subtitle">Track responsibilities, client relationships, and project progress.</p>
                         </div>
                     </div>
 
-                    <article class="panel">
-                        <div class="panel-heading"><h2>Create a project</h2></div>
-                        <form id="project-form" class="form-grid">
-                            <label>Client *
-                                <select name="client_id" id="project-client" required></select>
-                            </label>
-                            <label>Project title *
-                                <input name="title" required maxlength="200" placeholder="Project name">
-                            </label>
-                            <label>Status
-                                <select name="status">
-                                    <option value="planned">Planned</option>
-                                    <option value="in_progress">In progress</option>
-                                    <option value="completed">Completed</option>
-                                    <option value="on_hold">On hold</option>
-                                </select>
-                            </label>
-                            <label>Budget (NGN)
-                                <input name="budget" type="number" min="0" step="0.01" placeholder="0.00">
-                            </label>
-                            <label>Due date
-                                <input name="due_date" type="date">
-                            </label>
-                            <label class="full-width">Description
-                                <textarea name="description" rows="3" placeholder="What needs to be delivered?"></textarea>
-                            </label>
-                            <div class="full-width form-actions">
-                                <button class="primary-button" type="submit">Save project</button>
+                    <section class="panel form-panel">
+                        <div class="panel-header">
+                            <div>
+                                <h2 id="project-form-heading">Create a project</h2>
+                                <p>Give each piece of work a clear name and status.</p>
+                            </div>
+                            <span class="form-step">02 / PROJECTS</span>
+                        </div>
+
+                        <form id="project-form" class="data-form">
+                            <input type="hidden" id="project-id">
+
+                            <div class="form-grid">
+                                <div class="field">
+                                    <label for="project-name">Project name *</label>
+                                    <input id="project-name" name="name" type="text" placeholder="e.g. Website redesign" required>
+                                </div>
+
+                                <div class="field">
+                                    <label for="project-client">Associated client *</label>
+                                    <select id="project-client" name="client_id" required>
+                                        <option value="">Select a client</option>
+                                    </select>
+                                </div>
+
+                                <div class="field">
+                                    <label for="project-status">Status</label>
+                                    <select id="project-status" name="status">
+                                        <option value="planned">Planned</option>
+                                        <option value="active" selected>Active</option>
+                                        <option value="on_hold">On hold</option>
+                                        <option value="completed">Completed</option>
+                                        <option value="cancelled">Cancelled</option>
+                                    </select>
+                                </div>
+
+                                <div class="field">
+                                    <label for="project-deadline">Deadline</label>
+                                    <input id="project-deadline" name="deadline" type="date">
+                                </div>
+                            </div>
+
+                            <div class="field">
+                                <label for="project-description">Description</label>
+                                <textarea id="project-description" name="description" rows="3" placeholder="What does success look like for this project?"></textarea>
+                            </div>
+
+                            <div class="form-actions">
+                                <button id="project-cancel" class="secondary-button" type="button" hidden>Cancel edit</button>
+                                <button id="project-submit" class="primary-button" type="submit">Save project <span>→</span></button>
                             </div>
                         </form>
-                    </article>
+                    </section>
 
-                    <article class="panel">
-                        <div class="panel-heading"><h2>Project register</h2></div>
-                        <div id="projects-list" class="table-wrap"></div>
-                    </article>
+                    <section class="panel list-panel">
+                        <div class="panel-header">
+                            <div>
+                                <h2>Project portfolio</h2>
+                                <p id="projects-summary">Everything you are planning and delivering.</p>
+                            </div>
+
+                            <label class="search-box">
+                                <span>⌕</span>
+                                <input id="project-search" type="search" placeholder="Search projects…" aria-label="Search projects">
+                            </label>
+                        </div>
+
+                        <div id="projects-list" class="record-list">
+                            <div class="loading-state">Your projects will appear here.</div>
+                        </div>
+                    </section>
                 </section>
 
-                <section class="view" id="view-interactions">
-                    <div class="page-heading">
+                <!-- INTERACTIONS -->
+                <section id="view-interactions" class="view-section" hidden>
+                    <div class="page-intro">
                         <div>
-                            <p class="eyebrow">COMMUNICATION</p>
-                            <h1>Interactions</h1>
-                            <p class="muted">Maintain a useful history of client conversations.</p>
+                            <p class="eyebrow">RELATIONSHIPS / ACTIVITY LOG</p>
+                            <h1>Every conversation counts.</h1>
+                            <p class="page-subtitle">Record important meetings, calls, updates, and next steps.</p>
                         </div>
                     </div>
 
-                    <article class="panel">
-                        <div class="panel-heading"><h2>Record an interaction</h2></div>
-                        <form id="interaction-form" class="form-grid">
-                            <label>Client *
-                                <select name="client_id" id="interaction-client" required></select>
-                            </label>
-                            <label>Related project
-                                <select name="project_id" id="interaction-project"></select>
-                            </label>
-                            <label>Type *
-                                <select name="interaction_type" required>
-                                    <option value="call">Call</option>
-                                    <option value="meeting">Meeting</option>
-                                    <option value="email">Email</option>
-                                    <option value="note">Note</option>
-                                </select>
-                            </label>
-                            <label>Subject *
-                                <input name="subject" required maxlength="200" placeholder="Brief subject">
-                            </label>
-                            <label class="full-width">Details
-                                <textarea name="details" rows="3" placeholder="Summary, decisions, or next steps"></textarea>
-                            </label>
-                            <div class="full-width form-actions">
-                                <button class="primary-button" type="submit">Save interaction</button>
+                    <section class="panel form-panel">
+                        <div class="panel-header">
+                            <div>
+                                <h2 id="interaction-form-heading">Record an interaction</h2>
+                                <p>Capture the details you will want to remember.</p>
+                            </div>
+                            <span class="form-step">03 / ACTIVITY</span>
+                        </div>
+
+                        <form id="interaction-form" class="data-form">
+                            <input type="hidden" id="interaction-id">
+
+                            <div class="form-grid">
+                                <div class="field">
+                                    <label for="interaction-title">Interaction title *</label>
+                                    <input id="interaction-title" name="title" type="text" placeholder="e.g. Discussed project scope" required>
+                                </div>
+
+                                <div class="field">
+                                    <label for="interaction-client">Client *</label>
+                                    <select id="interaction-client" name="client_id" required>
+                                        <option value="">Select a client</option>
+                                    </select>
+                                </div>
+
+                                <div class="field">
+                                    <label for="interaction-project">Related project</label>
+                                    <select id="interaction-project" name="project_id">
+                                        <option value="">No project linked</option>
+                                    </select>
+                                </div>
+
+                                <div class="field">
+                                    <label for="interaction-type">Interaction type</label>
+                                    <select id="interaction-type" name="type">
+                                        <option value="meeting">Meeting</option>
+                                        <option value="call">Phone call</option>
+                                        <option value="email">Email</option>
+                                        <option value="message">Message</option>
+                                        <option value="other">Other</option>
+                                    </select>
+                                </div>
+
+                                <div class="field">
+                                    <label for="interaction-date">Date and time</label>
+                                    <input id="interaction-date" name="occurred_at" type="datetime-local">
+                                </div>
+                            </div>
+
+                            <div class="field">
+                                <label for="interaction-notes">Summary and next steps</label>
+                                <textarea id="interaction-notes" name="notes" rows="4" placeholder="What was discussed? What needs to happen next?"></textarea>
+                            </div>
+
+                            <div class="form-actions">
+                                <button id="interaction-cancel" class="secondary-button" type="button" hidden>Cancel edit</button>
+                                <button id="interaction-submit" class="primary-button" type="submit">Save interaction <span>→</span></button>
                             </div>
                         </form>
-                    </article>
+                    </section>
 
-                    <article class="panel">
-                        <div class="panel-heading"><h2>Interaction history</h2></div>
-                        <div id="interactions-list" class="table-wrap"></div>
-                    </article>
+                    <section class="panel list-panel">
+                        <div class="panel-header">
+                            <div>
+                                <h2>Interaction history</h2>
+                                <p id="interactions-summary">A record of your business conversations.</p>
+                            </div>
+
+                            <label class="search-box">
+                                <span>⌕</span>
+                                <input id="interaction-search" type="search" placeholder="Search activity…" aria-label="Search interactions">
+                            </label>
+                        </div>
+
+                        <div id="interactions-list" class="record-list">
+                            <div class="loading-state">Your interaction history will appear here.</div>
+                        </div>
+                    </section>
                 </section>
 
-                <footer class="footer">
-                    Felix Business Manager <span>·</span> Organise your business with clarity.
+                <footer class="app-footer">
+                    <span>Felix Business Manager</span>
+                    <span>Built for clarity. Designed for progress.</span>
                 </footer>
             </div>
         </main>
     </div>
 
-    <script src="/static/js/app.js" defer></script>
+    <dialog id="confirm-dialog" class="confirm-dialog">
+        <div class="dialog-mark">!</div>
+        <h2 id="confirm-title">Delete this record?</h2>
+        <p id="confirm-description">This action cannot be undone.</p>
+
+        <div class="dialog-actions">
+            <button id="confirm-cancel" class="secondary-button" type="button">Cancel</button>
+            <button id="confirm-accept" class="danger-button" type="button">Delete</button>
+        </div>
+    </dialog>
 </body>
 </html>
