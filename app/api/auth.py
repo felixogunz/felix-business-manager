@@ -1,4 +1,3 @@
-
 import hashlib
 import logging
 import secrets
@@ -40,31 +39,40 @@ bearer_scheme = HTTPBearer(auto_error=False)
 RESET_TOKEN_EXPIRE_MINUTES = 30
 
 
+def normalize_email(email: str) -> str:
+    """Normalize an email address for consistent account lookups."""
+    return email.strip().lower()
+
+
 def hash_reset_token(token: str) -> str:
     """Store only a SHA-256 hash of the reset token."""
     return hashlib.sha256(token.encode("utf-8")).hexdigest()
 
 
-def send_password_reset_email(email: str, token: str) -> None:
-    """Send a time-limited password-reset link through configured SMTP."""
-    required_settings = (
-        settings.SMTP_HOST,
-        settings.SMTP_USERNAME,
-        settings.SMTP_PASSWORD,
-        settings.SMTP_FROM_EMAIL,
+def email_is_configured() -> bool:
+    """Check that the required SMTP settings are present."""
+    return all(
+        str(value).strip()
+        for value in (
+            settings.SMTP_HOST,
+            settings.SMTP_USERNAME,
+            settings.SMTP_PASSWORD,
+            settings.SMTP_FROM_EMAIL,
+        )
     )
 
-    if not all(required_settings):
+
+def send_password_reset_email(email: str, token: str) -> None:
+    """Send a password-reset link using the configured SMTP sender."""
+    if not email_is_configured():
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="Password recovery email is not configured yet.",
+            detail="Password recovery email is not configured.",
         )
 
-    separator = "&" if "?" in settings.PASSWORD_RESET_URL else "?"
-    reset_link = (
-        f"{settings.PASSWORD_RESET_URL}{separator}"
-        f"reset_token={token}"
-    )
+    base_url = settings.PASSWORD_RESET_URL.strip()
+    separator = "&" if "?" in base_url else "?"
+    reset_link = f"{base_url}{separator}reset_token={token}"
 
     message = EmailMessage()
     message["Subject"] = "Reset your Felix Business Manager password"
@@ -73,8 +81,8 @@ def send_password_reset_email(email: str, token: str) -> None:
     message.set_content(
         "A password reset was requested for your Felix Business Manager "
         "account.\n\n"
-        "Use the link below to choose a new password. This link expires "
-        "in 30 minutes and can only be used once.\n\n"
+        "Use the link below to choose a new password. It expires in "
+        "30 minutes and can only be used once.\n\n"
         f"{reset_link}\n\n"
         "If you did not request this, you can safely ignore this email."
     )
@@ -98,19 +106,29 @@ def send_password_reset_email(email: str, token: str) -> None:
                 settings.SMTP_PORT,
                 timeout=20,
             ) as server:
+                server.ehlo()
+
                 if settings.SMTP_USE_TLS:
                     server.starttls(context=ssl.create_default_context())
+                    server.ehlo()
+
                 server.login(
                     settings.SMTP_USERNAME,
                     settings.SMTP_PASSWORD,
                 )
                 server.send_message(message)
+
     except (OSError, smtplib.SMTPException):
+        # Log the technical error on the server; do not expose credentials
+        # or SMTP details to the user.
         logger.exception("Password-reset email delivery failed.")
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="The password-reset email could not be sent. Please try again later.",
-        )
+            detail=(
+                "The password-reset email could not be sent. "
+                "Please try again later."
+            ),
+        ) from None
 
 
 @router.post(
@@ -122,8 +140,10 @@ def register_user(
     payload: RegisterRequest,
     db: Session = Depends(get_db),
 ):
+    email = normalize_email(str(payload.email))
+
     existing_user = db.scalar(
-        select(User).where(User.email == str(payload.email).lower())
+        select(User).where(User.email == email)
     )
 
     if existing_user is not None:
@@ -134,7 +154,7 @@ def register_user(
 
     user = User(
         full_name=payload.full_name,
-        email=str(payload.email).lower(),
+        email=email,
         hashed_password=hash_password(payload.password),
         is_active=True,
     )
@@ -151,9 +171,8 @@ def register_user(
 
     db.refresh(user)
 
-    access_token = create_access_token(str(user.id))
     return {
-        "access_token": access_token,
+        "access_token": create_access_token(str(user.id)),
         "token_type": "bearer",
         "user": user,
     }
@@ -164,8 +183,10 @@ def login_user(
     payload: LoginRequest,
     db: Session = Depends(get_db),
 ):
-    email = str(payload.email).lower()
-    user = db.scalar(select(User).where(User.email == email))
+    email = normalize_email(str(payload.email))
+    user = db.scalar(
+        select(User).where(User.email == email)
+    )
 
     if user is None or not verify_password(
         payload.password,
@@ -183,9 +204,8 @@ def login_user(
             detail="This account is inactive.",
         )
 
-    access_token = create_access_token(str(user.id))
     return {
-        "access_token": access_token,
+        "access_token": create_access_token(str(user.id)),
         "token_type": "bearer",
         "user": user,
     }
@@ -196,21 +216,17 @@ def forgot_password(
     payload: ForgotPasswordRequest,
     db: Session = Depends(get_db),
 ):
-    # Check global email configuration before checking whether an account
-    # exists, so missing SMTP configuration does not reveal account status.
-    if not all((
-        settings.SMTP_HOST,
-        settings.SMTP_USERNAME,
-        settings.SMTP_PASSWORD,
-        settings.SMTP_FROM_EMAIL,
-    )):
+    # Check global email configuration before account lookup.
+    if not email_is_configured():
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="Password recovery email is not configured yet.",
+            detail="Password recovery email is not configured.",
         )
 
-    email = str(payload.email).lower()
-    user = db.scalar(select(User).where(User.email == email))
+    email = normalize_email(str(payload.email))
+    user = db.scalar(
+        select(User).where(User.email == email)
+    )
 
     generic_response = {
         "message": (
@@ -219,6 +235,7 @@ def forgot_password(
         )
     }
 
+    # Unknown or inactive accounts receive the same public response.
     if user is None or not user.is_active:
         return generic_response
 
@@ -228,9 +245,34 @@ def forgot_password(
         datetime.now(timezone.utc)
         + timedelta(minutes=RESET_TOKEN_EXPIRE_MINUTES)
     )
-    db.commit()
 
-    send_password_reset_email(user.email, token)
+    try:
+        db.commit()
+    except Exception:
+        db.rollback()
+        logger.exception("Could not save password-reset token.")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Could not start password recovery. Please try again.",
+        ) from None
+
+    try:
+        send_password_reset_email(user.email, token)
+    except HTTPException:
+        # Do not leave a usable token behind when sending fails.
+        user.password_reset_token_hash = None
+        user.password_reset_expires_at = None
+
+        try:
+            db.commit()
+        except Exception:
+            db.rollback()
+            logger.exception(
+                "Could not clear reset token after email delivery failed."
+            )
+
+        raise
+
     return generic_response
 
 
@@ -240,6 +282,7 @@ def reset_password(
     db: Session = Depends(get_db),
 ):
     supplied_hash = hash_reset_token(payload.token)
+
     user = db.scalar(
         select(User).where(
             User.password_reset_token_hash == supplied_hash
@@ -253,13 +296,26 @@ def reset_password(
         )
 
     expiry = user.password_reset_expires_at
+
+    # Some databases return naive datetimes even when the column is
+    # timezone-aware. Treat those stored values as UTC.
     if expiry.tzinfo is None:
         expiry = expiry.replace(tzinfo=timezone.utc)
 
     if expiry <= datetime.now(timezone.utc):
         user.password_reset_token_hash = None
         user.password_reset_expires_at = None
-        db.commit()
+
+        try:
+            db.commit()
+        except Exception:
+            db.rollback()
+            logger.exception("Could not clear expired reset token.")
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Could not complete password recovery.",
+            ) from None
+
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="This reset link is invalid or has expired.",
@@ -268,7 +324,16 @@ def reset_password(
     user.hashed_password = hash_password(payload.new_password)
     user.password_reset_token_hash = None
     user.password_reset_expires_at = None
-    db.commit()
+
+    try:
+        db.commit()
+    except Exception:
+        db.rollback()
+        logger.exception("Could not save the new password.")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Could not reset your password. Please try again.",
+        ) from None
 
     return {
         "message": (
@@ -279,7 +344,9 @@ def reset_password(
 
 
 def get_current_user(
-    credentials: HTTPAuthorizationCredentials | None = Depends(bearer_scheme),
+    credentials: HTTPAuthorizationCredentials | None = Depends(
+        bearer_scheme
+    ),
     db: Session = Depends(get_db),
 ) -> User:
     if credentials is None:
@@ -301,7 +368,8 @@ def get_current_user(
             )
 
         user = db.get(User, int(subject))
-    except (jwt.InvalidTokenError, ValueError) as exc:
+
+    except jwt.InvalidTokenError as exc:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid or expired authentication token.",

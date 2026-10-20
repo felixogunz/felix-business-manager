@@ -1,4 +1,3 @@
-
 from app.services.operations import (
     commit_or_conflict,
     get_client_or_404,
