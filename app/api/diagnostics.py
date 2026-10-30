@@ -5,7 +5,6 @@ from importlib.metadata import version, PackageNotFoundError
 from fastapi import APIRouter, Depends, Header, HTTPException
 from sqlalchemy.orm import Session
 
-from pwdlib import PasswordHash
 from pwdlib.hashers.argon2 import Argon2Hasher
 
 from app.database import get_db
@@ -41,7 +40,6 @@ def inspect_password_hashes(
     ):
         raise HTTPException(status_code=404, detail="Not found")
 
-    recommended = PasswordHash.recommended()
     argon2_hasher = Argon2Hasher()
 
     users = db.query(User).limit(10).all()
@@ -55,8 +53,9 @@ def inspect_password_hashes(
             "user_id": user.id,
             "hash_prefix": stored_hash[:15],
             "hash_length": len(stored_hash),
-            "recommended_recognises": recommended.identify(stored_hash),
-            "argon2_recognises": argon2_hasher.identify(stored_hash),
+            "argon2_recognises": argon2_hasher.identify(
+                stored_hash
+            ),
         })
 
     return {
