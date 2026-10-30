@@ -343,6 +343,12 @@ function saveAuthenticatedSession(result) {
 function showWorkspace(user) {
     state.user = user;
 
+    const guestUpgradeBanner = $("#guest-upgrade-banner");
+
+    if (guestUpgradeBanner) {
+        guestUpgradeBanner.hidden = !user?.is_guest;
+    }
+
     $("#login-screen").hidden = true;
     $("#app-shell").hidden = false;
 

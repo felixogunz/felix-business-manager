@@ -423,6 +423,64 @@ select:focus-visible, textarea:focus-visible {
 .page-intro h1 span { color: var(--forest-700); }
 .page-subtitle { margin: 9px 0 0; color: var(--muted); font-size: 12px; line-height: 1.8; }
 
+/* GUEST ACCOUNT UPGRADE */
+.guest-upgrade-banner {
+    width: calc(100% - 72px);
+    max-width: 1528px;
+    margin: 20px auto 0;
+    padding: 17px 22px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    border: 1px solid rgba(190, 157, 91, .35);
+    border-left: 4px solid var(--gold-400);
+    border-radius: 13px;
+    background: linear-gradient(110deg, #f3f8f5, #fbfaf5);
+    box-shadow: 0 4px 14px rgba(22, 58, 50, .045);
+}
+
+.guest-upgrade-banner[hidden] {
+    display: none !important;
+}
+
+.guest-upgrade-copy strong {
+    display: block;
+    margin-bottom: 5px;
+    color: var(--forest-900);
+    font-family: 'Manrope', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.guest-upgrade-copy p {
+    margin: 0;
+    color: #64736c;
+    font-size: 11px;
+    line-height: 1.7;
+}
+
+.guest-upgrade-banner .primary-button {
+    flex-shrink: 0;
+    white-space: nowrap;
+    font-size: 11px;
+}
+
+@media (max-width: 640px) {
+    .guest-upgrade-banner {
+        width: calc(100% - 30px);
+        margin-top: 15px;
+        padding: 16px;
+        align-items: stretch;
+        flex-direction: column;
+        gap: 13px;
+    }
+
+    .guest-upgrade-banner .primary-button {
+        width: 100%;
+    }
+}
+
 .welcome-banner {
     position: relative;
     display: flex;
