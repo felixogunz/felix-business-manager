@@ -18,6 +18,7 @@ from app.core.security import (
     create_access_token,
     decode_access_token,
     hash_password,
+    needs_password_rehash,
     verify_password,
 )
 from app.database import get_db
@@ -177,13 +178,13 @@ def register_user(
         "user": user,
     }
 
-
 @router.post("/login", response_model=TokenResponse)
 def login_user(
     payload: LoginRequest,
     db: Session = Depends(get_db),
 ):
     email = normalize_email(str(payload.email))
+
     user = db.scalar(
         select(User).where(User.email == email)
     )
@@ -204,12 +205,29 @@ def login_user(
             detail="This account is inactive.",
         )
 
+    # Upgrade legacy scrypt hashes to Argon2 after successful login.
+    if needs_password_rehash(user.hashed_password):
+        user.hashed_password = hash_password(payload.password)
+
+        try:
+            db.commit()
+            db.refresh(user)
+        except Exception:
+            db.rollback()
+            logger.exception(
+                "Failed to upgrade password hash for user ID %s",
+                user.id,
+            )
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Unable to complete login. Please try again.",
+            )
+
     return {
         "access_token": create_access_token(str(user.id)),
         "token_type": "bearer",
         "user": user,
     }
-
 
 @router.post("/forgot-password")
 def forgot_password(
