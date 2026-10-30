@@ -9,7 +9,7 @@ from fastapi import Request
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
-from app.api import auth, clients, dashboard, interactions, projects
+from app.api import auth, clients, dashboard, interactions, projects, diagnostics
 from app.database import Base, engine, get_db
 from app.models import Client, Interaction, Project
 
@@ -113,4 +113,8 @@ app.include_router(
 app.include_router(
     interactions.router,
     dependencies=[Depends(get_current_user)],
+)
+
+app.include_router(
+    diagnostics.router
 )
