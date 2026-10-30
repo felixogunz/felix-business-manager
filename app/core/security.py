@@ -117,6 +117,7 @@ def needs_password_rehash(hashed_password: str) -> bool:
 def create_access_token(
     subject: str,
     expires_delta: timedelta | None = None,
+    additional_claims: dict | None = None,
 ) -> str:
     now = datetime.now(timezone.utc)
 
@@ -132,12 +133,14 @@ def create_access_token(
         "exp": expires,
     }
 
+    if additional_claims:
+        payload.update(additional_claims)
+
     return jwt.encode(
         payload,
         settings.SECRET_KEY,
         algorithm=ALGORITHM,
     )
-
 
 def decode_access_token(token: str) -> dict:
     return jwt.decode(

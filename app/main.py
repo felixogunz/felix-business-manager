@@ -89,7 +89,7 @@ def database_health_check(db: Session = Depends(get_db)):
         )
 
 
-from app.api.auth import get_current_user
+from app.api.auth import require_active_trial
 
 app.include_router(
     auth.router,
@@ -97,20 +97,20 @@ app.include_router(
 
 app.include_router(
     dashboard.router,
-    dependencies=[Depends(get_current_user)],
+    dependencies=[Depends(require_active_trial)],
 )
 
 app.include_router(
     clients.router,
-    dependencies=[Depends(get_current_user)],
+    dependencies=[Depends(require_active_trial)],
 )
 
 app.include_router(
     projects.router,
-    dependencies=[Depends(get_current_user)],
+    dependencies=[Depends(require_active_trial)],
 )
 
 app.include_router(
     interactions.router,
-    dependencies=[Depends(get_current_user)],
+    dependencies=[Depends(require_active_trial)],
 )

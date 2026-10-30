@@ -51,7 +51,6 @@ class ResetPasswordRequest(BaseModel):
     token: str = Field(min_length=20, max_length=500)
     new_password: str = Field(min_length=12, max_length=128)
 
-
 class UserOut(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
@@ -59,8 +58,10 @@ class UserOut(BaseModel):
     full_name: str
     email: EmailStr
     is_active: bool
+    is_guest: bool
+    trial_started_at: datetime | None
+    trial_expires_at: datetime | None
     created_at: datetime
-
 
 class TokenResponse(BaseModel):
     access_token: str

@@ -8,6 +8,48 @@
 const TOKEN_KEY = "felix_business_manager_token";
 const USER_KEY = "felix_business_manager_user";
 
+function getStoredToken() {
+    return (
+        localStorage.getItem(TOKEN_KEY) ||
+        sessionStorage.getItem(TOKEN_KEY)
+    );
+}
+
+function getStoredUser() {
+    const savedUser =
+        localStorage.getItem(USER_KEY) ||
+        sessionStorage.getItem(USER_KEY);
+
+    if (!savedUser) return null;
+
+    try {
+        return JSON.parse(savedUser);
+    } catch {
+        return null;
+    }
+}
+
+function saveSession(result) {
+    const storage = result.user.is_guest
+        ? localStorage
+        : sessionStorage;
+
+    localStorage.removeItem(TOKEN_KEY);
+    localStorage.removeItem(USER_KEY);
+    sessionStorage.removeItem(TOKEN_KEY);
+    sessionStorage.removeItem(USER_KEY);
+
+    storage.setItem(TOKEN_KEY, result.access_token);
+    storage.setItem(USER_KEY, JSON.stringify(result.user));
+}
+
+function clearSession() {
+    localStorage.removeItem(TOKEN_KEY);
+    localStorage.removeItem(USER_KEY);
+    sessionStorage.removeItem(TOKEN_KEY);
+    sessionStorage.removeItem(USER_KEY);
+}
+
 const $ = (selector, root = document) => root.querySelector(selector);
 const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
 
@@ -23,7 +65,7 @@ const state = {
 /* -------------------- API CLIENT -------------------- */
 
 async function api(path, options = {}) {
-    const token = sessionStorage.getItem(TOKEN_KEY);
+    const token = getStoredToken();
     const headers = new Headers(options.headers || {});
 
     if (options.body && !(options.body instanceof FormData)) {
@@ -67,8 +109,7 @@ async function api(path, options = {}) {
 
     if (!response.ok) {
         if (response.status === 401 && token) {
-            sessionStorage.removeItem(TOKEN_KEY);
-            sessionStorage.removeItem(USER_KEY);
+            clearSession();
         }
 
         const detail = result?.detail || result?.message;
@@ -89,7 +130,9 @@ async function api(path, options = {}) {
             message = "Some information is missing or invalid. Please review the form.";
         }
 
-        throw new Error(message);
+        const error = new Error(message);
+        error.status = response.status;
+        throw error;
     }
 
     return result;
@@ -255,6 +298,12 @@ function showAuthMode(mode, message = "", type = "error") {
     $("#login-heading").textContent = headings[mode];
     $("#login-description").textContent = descriptions[mode];
 
+    const guestTrialAction = $("#guest-trial-action");
+
+    if (guestTrialAction) {
+        guestTrialAction.hidden = mode !== "login";
+    }
+
     const switchArea = $("#auth-switch");
     switchArea.hidden = mode === "reset";
 
@@ -285,8 +334,7 @@ function saveAuthenticatedSession(result) {
         );
     }
 
-    sessionStorage.setItem(TOKEN_KEY, result.access_token);
-    sessionStorage.setItem(USER_KEY, JSON.stringify(result.user));
+    saveSession(result);
 
     state.user = result.user;
     return result.user;
@@ -326,6 +374,43 @@ async function authenticateAndOpenWorkspace(result, message) {
 
     await startApp();
 }
+
+/* -------------------- GUEST ACCESS -------------------- */
+
+$("#guest-trial-button").addEventListener("click", async () => {
+    const button = $("#guest-trial-button");
+
+    setButtonLoading(
+        button,
+        true,
+        "Starting your trial...",
+        "Continue as Guest →"
+    );
+
+    setAuthMessage();
+
+    try {
+        const result = await api("/api/auth/guest", {
+            method: "POST"
+        });
+
+        await authenticateAndOpenWorkspace(
+            result,
+            "Welcome! Your 48-hour free trial has started."
+        );
+
+    } catch (error) {
+        setAuthMessage(getErrorMessage(error));
+
+    } finally {
+        setButtonLoading(
+            button,
+            false,
+            "",
+            "Continue as Guest →"
+        );
+    }
+});
 
 document.addEventListener("click", event => {
     const modeButton = event.target.closest("[data-auth-mode]");
@@ -508,8 +593,7 @@ $("#reset-form").addEventListener("submit", async event => {
             })
         });
 
-        sessionStorage.removeItem(TOKEN_KEY);
-        sessionStorage.removeItem(USER_KEY);
+        clearSession();
 
         window.history.replaceState(
             {},
@@ -1363,7 +1447,7 @@ async function deleteRecord(resource, id, successMessage) {
 function handleError(error) {
     console.error("Felix Business Manager:", error);
 
-    if (!sessionStorage.getItem(TOKEN_KEY)) {
+    if (!getStoredToken()) {
         showLoginScreen("Please sign in to continue.");
         return;
     }
@@ -1374,8 +1458,7 @@ function handleError(error) {
 /* -------------------- LOGOUT -------------------- */
 
 $("#logout-button").addEventListener("click", () => {
-    sessionStorage.removeItem(TOKEN_KEY);
-    sessionStorage.removeItem(USER_KEY);
+    clearSession();
 
     state.user = null;
     state.clients = [];
@@ -1428,7 +1511,7 @@ async function initializeAuthentication() {
         return;
     }
 
-    const token = sessionStorage.getItem(TOKEN_KEY);
+    const token = getStoredToken();
 
     if (!token) {
         showLoginScreen();
@@ -1436,17 +1519,32 @@ async function initializeAuthentication() {
     }
 
     try {
-        const user = await api("/api/auth/me");
+    const user = await api("/api/auth/me");
 
-        sessionStorage.setItem(USER_KEY, JSON.stringify(user));
-        showWorkspace(user);
+    saveSession({
+        access_token: token,
+        user: user
+    });
 
-        await startApp();
+    showWorkspace(user);
+
+    await startApp();
+
     } catch (error) {
-        sessionStorage.removeItem(TOKEN_KEY);
-        sessionStorage.removeItem(USER_KEY);
 
-        showLoginScreen("Your session has expired. Please sign in again.");
+        if (error.status === 401) {
+            clearSession();
+
+            showLoginScreen(
+                "Your session has expired. Please sign in again."
+            );
+
+            return;
+        }
+
+        showLoginScreen(
+            "Unable to verify your session. Check your internet connection and refresh the page. Your saved session has been preserved."
+        );
     }
 }
 
@@ -1462,13 +1560,7 @@ async function initializeAuthentication() {
     const profileEmail = getElement("profile-email");
 
     function getCurrentUser() {
-        try {
-            const savedUser = sessionStorage.getItem(USER_KEY);
-            return savedUser ? JSON.parse(savedUser) : null;
-        } catch (error) {
-            console.error("Could not read the saved user account.", error);
-            return null;
-        }
+        return getStoredUser();
     }
 
     function navigateTo(view) {
@@ -1552,10 +1644,10 @@ async function initializeAuthentication() {
             return;
         }
 
-        sessionStorage.removeItem(TOKEN_KEY);
-        sessionStorage.removeItem(USER_KEY);
+        clearSession();
 
         window.location.assign("/");
+
     });
 
     function updateProfileName() {
@@ -1583,7 +1675,7 @@ async function initializeAuthentication() {
     getElement("brand-home-link")?.addEventListener("click", event => {
         event.preventDefault();
 
-        const token = sessionStorage.getItem(TOKEN_KEY);
+        const token = getStoredToken();        
         const appShell = getElement("app-shell");
         const loginScreen = getElement("login-screen");
 

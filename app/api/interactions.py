@@ -1,5 +1,5 @@
-from fastapi import APIRouter, Depends, Response, status
-from sqlalchemy import select
+from fastapi import APIRouter, Depends, HTTPException, Response, status
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.api.auth import get_current_user
@@ -58,6 +58,23 @@ def create_interaction(
         project_id=data.get("project_id"),
         user_id=current_user.id,
     )
+
+    if current_user.is_guest:
+        interaction_count = db.scalar(
+            select(func.count(Interaction.id))
+            .join(Client, Interaction.client_id == Client.id)
+            .where(Client.user_id == current_user.id)
+        )
+
+        if interaction_count >= 20:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail=(
+                    "You have reached the 20-interaction limit "
+                    "for your guest trial. Create a free account "
+                    "to continue."
+                ),
+            )
 
     interaction = Interaction(**data)
     db.add(interaction)

@@ -1,5 +1,5 @@
-from fastapi import APIRouter, Depends, Response, status
-from sqlalchemy import select
+from fastapi import APIRouter, Depends, HTTPException, Response, status
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.api.auth import get_current_user
@@ -45,6 +45,23 @@ def create_project(
     current_user: User = Depends(get_current_user),
 ):
     get_client_or_404(db, payload.client_id, current_user.id)
+
+    if current_user.is_guest:
+        project_count = db.scalar(
+            select(func.count(Project.id))
+            .join(Client, Project.client_id == Client.id)
+            .where(Client.user_id == current_user.id)
+        )
+
+        if project_count >= 5:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail=(
+                    "You have reached the 5-project limit "
+                    "for your guest trial. Create a free account "
+                    "to continue."
+                ),
+            )
 
     project = Project(**payload.model_dump())
     db.add(project)

@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.api.auth import get_current_user
@@ -49,6 +49,23 @@ def create_client(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
+    if current_user.is_guest:
+        client_count = db.scalar(
+            select(func.count(Client.id)).where(
+                Client.user_id == current_user.id
+            )
+        )
+
+        if client_count >= 10:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail=(
+                    "You have reached the 10-client limit "
+                    "for your guest trial. Create a free account "
+                    "to continue."
+                ),
+            )
+
     client = Client(
         **payload.model_dump(),
         user_id=current_user.id,

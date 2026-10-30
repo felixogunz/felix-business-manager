@@ -1,4 +1,3 @@
-
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
@@ -35,6 +34,8 @@ def test_client():
 
     app.dependency_overrides[get_db] = override_get_db
     client = TestClient(app)
+
+    client.testing_session_local = TestingSessionLocal
 
     try:
         # Create a test account in the isolated test database.

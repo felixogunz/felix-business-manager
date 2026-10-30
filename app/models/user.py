@@ -41,6 +41,24 @@ class User(Base):
         nullable=False,
     )
 
+    # Guest trial account information.
+    is_guest: Mapped[bool] = mapped_column(
+        Boolean,
+        default=False,
+        server_default="false",
+        nullable=False,
+    )
+
+    trial_started_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True),
+        nullable=True,
+    )
+
+    trial_expires_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True),
+        nullable=True,
+    )
+
     # Used for secure, expiring password-reset links.
     password_reset_token_hash: Mapped[str | None] = mapped_column(
         String(255),
