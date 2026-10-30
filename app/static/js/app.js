@@ -1614,6 +1614,34 @@ initialInteractionDate.setMinutes(
 $("#interaction-date").value =
     initialInteractionDate.toISOString().slice(0, 16);
 
+
+/* -------------------- PASSWORD VISIBILITY TOGGLE -------------------- */
+
+document.addEventListener("click", event => {
+    const toggleButton = event.target.closest("[data-password-toggle]");
+
+    if (!toggleButton) return;
+
+    const inputId = toggleButton.dataset.passwordToggle;
+    const passwordInput = document.getElementById(inputId);
+
+    if (!passwordInput) return;
+
+    const isPasswordHidden = passwordInput.type === "password";
+
+    passwordInput.type = isPasswordHidden ? "text" : "password";
+
+    toggleButton.setAttribute(
+        "aria-label",
+        isPasswordHidden ? "Hide password" : "Show password"
+    );
+
+    toggleButton.setAttribute(
+        "aria-pressed",
+        String(isPasswordHidden)
+    );
+});
+
 /* -------------------- START APPLICATION -------------------- */
 
 initializeAuthentication();

@@ -953,3 +953,54 @@ select:focus-visible, textarea:focus-visible {
         animation: none;
     }
 }
+
+
+/* -------------------- PASSWORD VISIBILITY TOGGLE -------------------- */
+
+.password-input-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+.auth-form .password-input-wrapper input {
+    padding-right: 48px;
+}
+
+.password-toggle {
+    position: absolute;
+    top: 50%;
+    right: 12px;
+    transform: translateY(-50%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    padding: 6px;
+    border: 0;
+    border-radius: 7px;
+    background: transparent;
+    color: #718078;
+    cursor: pointer;
+    transition: color 0.2s ease, background 0.2s ease;
+}
+
+.password-toggle:hover {
+    color: var(--forest-700);
+    background: #f0f5f1;
+}
+
+.password-toggle:focus-visible {
+    outline: 2px solid var(--forest-600);
+    outline-offset: 2px;
+}
+
+.password-toggle svg {
+    width: 19px;
+    height: 19px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}

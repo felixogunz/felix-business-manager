@@ -88,11 +88,24 @@
                         <button type="button" class="text-button" data-auth-mode="forgot">Forgot password?</button>
                     </div>
 
-                    <input id="login-password" name="password" type="password" placeholder="Enter your password" autocomplete="current-password" required>
+                    <div class="password-input-wrapper">
+                        <input id="login-password" name="password" type="password" placeholder="Enter your password" autocomplete="current-password" required>
+
+                        <button type="button" class="password-toggle"
+                                data-password-toggle="login-password"
+                                aria-label="Show password"
+                                aria-pressed="false">
+                            <svg viewBox="0 0 24 24" aria-hidden="true">
+                                <path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7Z"/>
+                                <circle cx="12" cy="12" r="3"/>
+                            </svg>
+                        </button>
+                    </div>
 
                     <button id="login-submit" class="primary-button auth-submit" type="submit">
                         Sign in <span>→</span>
                     </button>
+
                 </form>
 
                 <form id="register-form" class="auth-form" hidden>
@@ -103,8 +116,19 @@
                     <input id="register-email" name="email" type="email" placeholder="you@example.com" autocomplete="email" required>
 
                     <label for="register-password">Create password</label>
-                    <input id="register-password" name="password" type="password" placeholder="At least 12 characters" autocomplete="new-password" minlength="12" required>
+                    <div class="password-input-wrapper">
+                        <input id="register-password" name="password" type="password" placeholder="At least 12 characters" autocomplete="new-password" minlength="12" required>
 
+                        <button type="button" class="password-toggle"
+                                data-password-toggle="register-password"
+                                aria-label="Show password"
+                                aria-pressed="false">
+                            <svg viewBox="0 0 24 24" aria-hidden="true">
+                                <path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7Z"/>
+                                <circle cx="12" cy="12" r="3"/>
+                            </svg>
+                        </button>
+                    </div>
                     <p class="field-hint">Use at least 12 characters for your password.</p>
 
                     <button id="register-submit" class="primary-button auth-submit" type="submit">
@@ -125,11 +149,33 @@
 
                 <form id="reset-form" class="auth-form" hidden>
                     <label for="reset-password">New password</label>
-                    <input id="reset-password" name="new_password" type="password" placeholder="At least 12 characters" autocomplete="new-password" minlength="12" required>
+                    <div class="password-input-wrapper">
+                        <input id="reset-password" name="new_password" type="password" placeholder="At least 12 characters" autocomplete="new-password" minlength="12" required>
 
+                        <button type="button" class="password-toggle"
+                                data-password-toggle="reset-password"
+                                aria-label="Show password"
+                                aria-pressed="false">
+                            <svg viewBox="0 0 24 24" aria-hidden="true">
+                                <path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7Z"/>
+                                <circle cx="12" cy="12" r="3"/>
+                            </svg>
+                        </button>
+                    </div>
                     <label for="reset-password-confirm">Confirm new password</label>
-                    <input id="reset-password-confirm" name="password_confirmation" type="password" placeholder="Enter your new password again" autocomplete="new-password" minlength="12" required>
+                    <div class="password-input-wrapper">
+                        <input id="reset-password-confirm" name="password_confirmation" type="password" placeholder="Enter your new password again" autocomplete="new-password" minlength="12" required>
 
+                        <button type="button" class="password-toggle"
+                                data-password-toggle="reset-password-confirm"
+                                aria-label="Show password"
+                                aria-pressed="false">
+                            <svg viewBox="0 0 24 24" aria-hidden="true">
+                                <path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7Z"/>
+                                <circle cx="12" cy="12" r="3"/>
+                            </svg>
+                        </button>
+                    </div>
                     <button id="reset-submit" class="primary-button auth-submit" type="submit">
                         Reset password <span>→</span>
                     </button>
